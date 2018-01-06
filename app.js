@@ -46,13 +46,7 @@ io.on('connection', function(socket) {
     }
 
     // Check if sent alleigance is valid
-    let validAlleigance = false;
-    for (let alleigance of Client.alleigances)
-      if (alleigance == data.alleigance) {
-        validAlleigance = true;
-        break;
-      }
-    if (!validAlleigance) {
+    if (Client.alleigances.indexOf(data.alleigance) === -1) {
       socket.emit('profileError', 'Possible alleigances are ' + Client.alleigances.join(' or '));
       return;
     }
