@@ -76,6 +76,6 @@ io.on('connection', function(socket) {
   });
 });
 
-http.listen(3000, function() {
+http.listen(PORT, function() {
   console.log(`server up and running on http://localhost:${PORT}`);
 });
