@@ -9,6 +9,43 @@ const Client = function(socket) {
   this.socket = socket;
   this.alleigance = null; // CZ or DE
   this.room = null;
+  this.opponent = null;
+
+  /**
+   *  Emits clientĹist with list of all current clients in lobby
+   */
+  this.sendClientsList = () => {
+    let emittedData = []
+    for (let client of clients)
+      if ((client !== this) &&(client.room === 'lobby'))
+        emittedData.push({
+          'name': client.name,
+          'alleigance': client.alleigance
+        });
+    this.socket.emit('clientList', emittedData);
+  };
+
+
+  /**
+   * Changes room, sending requiered events
+   */
+  this.switchRoom = (room) => {
+    if (this.room !== null)
+      this.socket.leave(room);
+    if (room === 'lobby') // entering lobby
+      io.sockets.in(room).emit('clientEnteredLobby', {
+        'name': this.name,
+        'alleigance': this.alleigance
+      });
+    if (this.room == 'lobby') // leaving lobby
+      io.sockets.in(this.room).emit('clientLeavedLobby', {
+        'name': this.name,
+        'alleigance': this.alleigance
+      });
+    this.room = room;
+    if (room !== null)
+      this.socket.join(room);
+  }
 }
 Client.alleigances = ["CZ", 'DE'];
 
@@ -61,11 +98,15 @@ io.on('connection', function(socket) {
     // Set client's data and emit success
     clientCurr.name = data['name'];
     clientCurr.alleigance = data['alleigance'];
+    clientCurr.dataSet = true;
     socket.emit('profileSet', 'You may proceed');
+    clientCurr.switchRoom('lobby');
+    clientCurr.sendClientsList();
   });
 
   socket.on('disconnect', function() {
     console.log(clientCurr.name !== null ? `${clientCurr.name} has left us for now` : 'some random trespasser went away');
+    clientCurr.switchRoom(null);
     clients.splice(clients.indexOf(clientCurr), 1); // remove client from array. He is dead for me now.
   });
 });
