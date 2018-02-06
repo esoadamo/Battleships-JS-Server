@@ -4,7 +4,7 @@
   "description": "Battleship - a JS server",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "nodemon app.js"
   },
   "keywords": [
     "battleships",
@@ -16,5 +16,8 @@
   "dependencies": {
     "express": "^4.16.2",
     "socket.io": "^2.0.4"
+  },
+  "devDependencies": {
+    "nodemon": "^1.14.12"
   }
 }
