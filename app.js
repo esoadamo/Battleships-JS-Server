@@ -1,6 +1,7 @@
 const app = require('express')();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
+const moment = require('moment');
 
 const PORT = 3000;
 
@@ -93,7 +94,7 @@ io.on('connection', function(socket) {
         return;
       }
 
-    console.log(`→  ${data['name']} (${data['nationality']}) joined`);
+    console.log(`[${moment().format('HH:mm:ss')}] →  ${data['name']} (${data['nationality']}) joined`);
 
     // Set client's data and emit success
     clientCurr.name = data['name'];
@@ -103,14 +104,20 @@ io.on('connection', function(socket) {
     clientCurr.switchRoom('lobby');
     clientCurr.sendClientsList();
 
-    console.log(`-- online: ${clients.map(client => client.name)}\n`);
+    console.log(`[${moment().format('HH:mm:ss')}] -- online: ${clients
+      .map(client => client.name)
+      .filter(client => client !== null)
+      .join(', ')}\n`);
   });
 
   socket.on('disconnect', function() {
-    console.log(clientCurr.name !== null ? `←  ${clientCurr.name} left` : '←  undefined left');
+    console.log(clientCurr.name !== null ? `[${moment().format('HH:mm:ss')}] ←  ${clientCurr.name} left` : '←  undefined left');
     clientCurr.switchRoom(null);
     clients.splice(clients.indexOf(clientCurr), 1); // remove client from array. He is dead for me now.
-    console.log(`-- online: ${clients.map(client => client.name)}\n`);
+    console.log(`[${moment().format('HH:mm:ss')}] -- online: ${clients
+      .map(client => client.name)
+      .filter(client => client !== null)
+      .join(', ')}\n`);
   });
 });
 
