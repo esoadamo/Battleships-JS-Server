@@ -8,8 +8,8 @@
     const socket = io();
     function join(){
       let name = document.querySelector('#name').value;
-      let alleigance = document.querySelector('#alleigance').value;
-      socket.emit('setProfile', {'name': name, 'alleigance': alleigance});
+      let nationality = document.querySelector('#nationality').value;
+      socket.emit('setProfile', {'name': name, 'nationality': nationality});
     }
     socket.on('profileSet', function(data) {
       document.body.innerHTML = 'Joined!';
@@ -22,7 +22,7 @@
 
 <body>
   Name: <input type='text' id='name'><br>
-  Alleigance: <input type='text' id ='alleigance'><br>
+  nationality: <input type='text' id ='nationality'><br>
   <button onclick="join();">Join</button>
 </body>
 
