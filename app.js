@@ -25,7 +25,6 @@ const Client = function(socket) {
     this.socket.emit('clientList', emittedData);
   };
 
-
   /**
    * Changes room, sending requiered events
    */
@@ -57,8 +56,6 @@ app.get('*', function(req, res) {
 });
 
 io.on('connection', function(socket) {
-  console.log('A wild user has appeared');
-
   // Initialize new client and add himto into global list of clients
   let clientCurr = new Client(socket);
   clients.push(clientCurr);
@@ -96,6 +93,8 @@ io.on('connection', function(socket) {
         return;
       }
 
+    console.log(`→  ${data['name']} (${data['nationality']}) joined`);
+
     // Set client's data and emit success
     clientCurr.name = data['name'];
     clientCurr.nationality = data['nationality'];
@@ -103,12 +102,15 @@ io.on('connection', function(socket) {
     socket.emit('profileSet', 'You may proceed');
     clientCurr.switchRoom('lobby');
     clientCurr.sendClientsList();
+
+    console.log(`-- online: ${clients.map(client => client.name)}\n`);
   });
 
   socket.on('disconnect', function() {
-    console.log(clientCurr.name !== null ? `${clientCurr.name} has left us for now` : 'some random trespasser went away');
+    console.log(clientCurr.name !== null ? `←  ${clientCurr.name} left` : '←  undefined left');
     clientCurr.switchRoom(null);
     clients.splice(clients.indexOf(clientCurr), 1); // remove client from array. He is dead for me now.
+    console.log(`-- online: ${clients.map(client => client.name)}\n`);
   });
 });
 
