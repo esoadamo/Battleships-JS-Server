@@ -7,7 +7,7 @@ const PORT = 3000;
 const Client = function(socket) {
   this.name = null;
   this.socket = socket;
-  this.alleigance = null; // CZ or DE
+  this.nationality = null; // CZ or DE
   this.room = null;
   this.opponent = null;
 
@@ -20,7 +20,7 @@ const Client = function(socket) {
       if ((client !== this) &&(client.room === 'lobby'))
         emittedData.push({
           'name': client.name,
-          'alleigance': client.alleigance
+          'nationality': client.nationality
         });
     this.socket.emit('clientList', emittedData);
   };
@@ -35,19 +35,20 @@ const Client = function(socket) {
     if (room === 'lobby') // entering lobby
       io.sockets.in(room).emit('clientEnteredLobby', {
         'name': this.name,
-        'alleigance': this.alleigance
+        'nationality': this.nationality
       });
     if (this.room == 'lobby') // leaving lobby
       io.sockets.in(this.room).emit('clientLeavedLobby', {
         'name': this.name,
-        'alleigance': this.alleigance
+        'nationality': this.nationality
       });
     this.room = room;
     if (room !== null)
       this.socket.join(room);
   }
 }
-Client.alleigances = ["CZ", 'DE'];
+
+Client.nationalities = ["CZ", 'DE'];
 
 const clients = [];
 
@@ -63,8 +64,8 @@ io.on('connection', function(socket) {
   clients.push(clientCurr);
 
   /*
-  Set name and alleigance of current the client
-  Requied data parameters are name and alleigance
+  Set name and nationality of current the client
+  Requied data parameters are name and nationality
   Emit profileSet on success, profileError on some error (like the name is already taken)
   */
   socket.on('setProfile', function(data) {
@@ -77,14 +78,14 @@ io.on('connection', function(socket) {
       socket.emit('profileError', 'setProfile data must contain a "name" key');
       return;
     }
-    if (!('alleigance' in data)) {
-      socket.emit('profileError', 'setProfile data must contain a "alleigance" key');
+    if (!('nationality' in data)) {
+      socket.emit('profileError', 'setProfile data must contain a "nationality" key');
       return;
     }
 
-    // Check if sent alleigance is valid
-    if (Client.alleigances.indexOf(data.alleigance) === -1) {
-      socket.emit('profileError', 'Possible alleigances are ' + Client.alleigances.join(' or '));
+    // Check if sent nationality is valid
+    if (Client.nationalities.indexOf(data.nationality) === -1) {
+      socket.emit('profileError', 'Possible nationalities are ' + Client.nationalities.join(' or '));
       return;
     }
 
@@ -97,7 +98,7 @@ io.on('connection', function(socket) {
 
     // Set client's data and emit success
     clientCurr.name = data['name'];
-    clientCurr.alleigance = data['alleigance'];
+    clientCurr.nationality = data['nationality'];
     clientCurr.dataSet = true;
     socket.emit('profileSet', 'You may proceed');
     clientCurr.switchRoom('lobby');
@@ -112,5 +113,5 @@ io.on('connection', function(socket) {
 });
 
 http.listen(PORT, function() {
-  console.log(`server up and running on http://localhost:${PORT}`);
+  console.log(`Live on http://localhost:${PORT}`);
 });
