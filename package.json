@@ -1,14 +1,10 @@
 {
-  "name": "battleships-server",
+  "name": "battleship-server",
   "version": "0.0.1",
-  "description": "A server for battleships game in JS",
+  "description": "Battleship - a JS server",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/esoadamo/Battleships-JS-Server.git"
+    "start": "node app.js"
   },
   "keywords": [
     "battleships",
@@ -17,8 +13,8 @@
   ],
   "author": "Adam Hlaváček",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/esoadamo/Battleships-JS-Server/issues"
-  },
-  "homepage": "https://github.com/esoadamo/Battleships-JS-Server#readme"
+  "dependencies": {
+    "express": "^4.16.2",
+    "socket.io": "^2.0.4"
+  }
 }
