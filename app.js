@@ -33,12 +33,12 @@ const Client = function(socket) {
     if (this.room !== null)
       this.socket.leave(room);
     if (room === 'lobby') // entering lobby
-      io.sockets.in(room).emit('clientEnteredLobby', {
+      io.sockets.in(room).emit('clientJoinedLobby', {
         'name': this.name,
         'nationality': this.nationality
       });
     if (this.room == 'lobby') // leaving lobby
-      io.sockets.in(this.room).emit('clientLeavedLobby', {
+      io.sockets.in(this.room).emit('clientLeftLobby', {
         'name': this.name,
         'nationality': this.nationality
       });
