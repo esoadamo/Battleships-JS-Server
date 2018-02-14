@@ -36,7 +36,7 @@ const Client = function(socket) {
       this.socket.leave(room);
 
     // Entering the lobby
-    if (room ==== 'lobby') {
+    if (room === 'lobby') {
       io.sockets.in(room).emit('clientJoinedLobby', {
         'name': this.name,
         'nationality': this.nationality
