@@ -3,14 +3,14 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const moment = require('moment');
 
-const PORT = 3000;
+const PORT = 3000; // server port
 
 const Client = function(socket) {
-  this.name = null;
-  this.socket = socket;
-  this.nationality = null; // CZ or DE
-  this.room = null;
-  this.opponent = null;
+  this.name = null;  // unique name of the client
+  this.socket = socket;  // socket he has connected from
+  this.nationality = null; // One of the Client.nationalities's items
+  this.room = null;  // null, lobby
+  this.opponent = null;  // who wants to test strength again this little fellow?
 
   /**
    *  Emits clientĹist with list of all current clients in lobby
@@ -48,9 +48,9 @@ const Client = function(socket) {
   }
 }
 
-Client.nationalities = ["CZ", 'DE'];
+Client.nationalities = ["CZ", 'DE'];  // the two competing sides
 
-const clients = [];
+const clients = [];  // list of all conected Client instances
 
 app.get('*', function(req, res) {
   res.sendFile(__dirname + '/index.html');
@@ -108,8 +108,11 @@ io.on('connection', function(socket) {
       .map(client => client.name)
       .filter(client => client !== null)
       .join(', ')}\n`);
-  });
+  });  // End of .on('setProfile' event
 
+  /*
+  It is sad, but the socket left us alone. Let's tell everybody the name of the One who left our party. (Or say nothing, if we didn't know his name)
+  */
   socket.on('disconnect', function() {
     console.log(clientCurr.name !== null ? `[${moment().format('HH:mm:ss')}] ←  ${clientCurr.name} left` : '←  undefined left');
     clientCurr.switchRoom(null);
