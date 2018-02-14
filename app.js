@@ -36,7 +36,7 @@ const Client = function(socket) {
       this.socket.leave(room);
 
     // Entering the lobby
-    if (room === 'lobby') {
+    if (room ==== 'lobby') {
       io.sockets.in(room).emit('clientJoinedLobby', {
         'name': this.name,
         'nationality': this.nationality
@@ -63,19 +63,32 @@ const Client = function(socket) {
 
       // This seems like an interesting challenge!
       this.socket.on('gameChallengeAccept', (opponentName) => {
+        /*
+        Create separate room for battle with "battle-" prefix and emit gameStarting in the room
+        Data for gameStarting event are list of the clients names and nationalities
+        */
         let opponent = Client.clientByName(opponentName, room);
         if (opponent === null)
           return;
         let battleRoomName = "";
-        while (true){
+        do{
           battleRoomName = "battle-" + uuid();
-          // TODO Finish joining the fight
-        }
+        } while(battleRoomName in Object.keys(battles));
+        battles[battleRoomName] = [this, opponent];
+        this.switchRoom(battleRoomName);
+        opponent.switchRoom(battleRoomName);
+        io.sockets.in(battleRoomName).emit('gameStarting', [{
+          'name': this.name,
+          'nationality': this.nationality
+        }, {
+          'name': opponent.name,
+          'nationality': opponent.nationality
+        }]);
       });
     }
 
     // Leaving the lobby
-    if (this.room == 'lobby') {
+    if (this.room === 'lobby') {
       // this.socket.off('gameChallenge'); // FIXME Why does this not work?
       io.sockets.in(this.room).emit('clientLeftLobby', {
         'name': this.name,
