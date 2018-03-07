@@ -148,7 +148,7 @@ const Client = function(socket) {
     }
 
     // Leaving battle
-    if (this.room.startsWith('battle-')){
+    if ((this.room !== null) && (this.room.startsWith('battle-'))){
       if (!this.gameCompleted)
         this.opponent.socket.emit('opponentLeft', null);
       /* FIXME why does this not work
