@@ -37,6 +37,7 @@ h1 {
 
 table {
   width: 100%;
+  border-collapse: collapse;
 }
 
 td, th {
@@ -46,7 +47,11 @@ td, th {
 }
 
 tr {
-  border: 100px solid #000000;
+  border-bottom: 1px solid #000000;
+}
+
+tr:nth-child(even) {
+  background: #fffcf5;
 }
 
 .basicText {

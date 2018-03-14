@@ -9,18 +9,46 @@
 <body>
   <div class="pageContent">
     <h1>BattleShips - results</h1>
-    <table border="1">
-      <tr>
-        <th>Name</th>
-        <th>Wins</th>
-      </tr>
-      <tr>
-        <td>This</td>
-        <td>That</td>
-      </tr>
+    <table>
+      <tbody id="tbody">
+        <tr>
+          <th>Name</th>
+          <th>Wins</th>
+        </tr>
+        <tr>
+          <td>This</td>
+          <td>That</td>
+        </tr>
+      </tbody>
     </table>
   </div>
   </div>
+
+  <script>
+    const refreshSeconds = 10;
+    const tbody = querySelector('#tbody')
+
+    function paintTable(data) {
+      tbody.innerHTML = "";
+      for (user of Object.keys(data)) {
+        let tr = document.createElement('tr');
+        let td = document.createElement('td');
+        td.textContent = user;
+        tr.appendChild(td);
+        tbody.appendChild(td);
+      }
+    }
+
+    setInterval(() => {
+      var xmlHttp = new XMLHttpRequest();
+      xmlHttp.onreadystatechange = function() {
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+          paintTable(JSON.parse(xmlHttp.responseText));
+      }
+      xmlHttp.open("GET", "/api/stats", true);
+      xmlHttp.send(null);
+    }, refreshSeconds * 1000);
+  </script>
 </body>
 
 </html>

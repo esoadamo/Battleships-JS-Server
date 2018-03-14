@@ -253,6 +253,11 @@ app.get('/stats', function(req, res) {
   res.sendFile(__dirname + '/stats/stats.html');
 });
 
+app.get('/api/stats', function(req, res) {
+  res.header("Content-Type", "text/json");
+  res.send(JSON.stringify(statictics));
+});
+
 app.get('/stats.css', function(req, res) {
   res.sendFile(__dirname + '/stats/stats.css');
 });
