@@ -98,7 +98,7 @@ const Client = function(socket) {
 
       // Leaving the lobby
       if (this.room === 'lobby') {
-        // this.socket.off('gameChallenge'); // FIXME Why does this not work?
+        this.socket.removeAllListeners('gameChallenge');
         io.sockets.in(this.room).emit('clientLeftLobby', {
           'name': this.name,
           'nationality': this.nationality
@@ -188,10 +188,8 @@ const Client = function(socket) {
           statictics[this.opponent.name].wins ++;
           statictics[this.name].looses ++;
         }
-        /* FIXME why does this not work
-        this.socket.off('draftCompleted');
-        this.socket.off('shotFired');
-         */
+        this.socket.removeAllListeners('draftCompleted');
+        this.socket.removeAllListeners('shotFired');
       }
 
       this.room = room;
