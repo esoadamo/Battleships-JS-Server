@@ -241,16 +241,16 @@ const battles = {}; // list of all battle rooms
 
 const statictics = {
   Boy1: {
-    wins: 5,
-    looses: 4,
+    wins: 4,
+    looses: 5,
     shotsFired: 16,
     shotsFiredHit: 4,
     shotsTaken: 14,
     shotsTakenHit: 3
   },
   Boy2: {
-    wins: 4,
-    looses: 5,
+    wins: 5,
+    looses: 4,
     shotsFired: 14,
     shotsFiredHit: 3,
     shotsTaken: 16,

@@ -33,7 +33,8 @@
       let headers = ['Name', 'Games', 'Wins', 'Shots fired (accuracy)', 'Shots taken (avoidance)']
       for (user of Object.keys(data)) {
         let tr = document.createElement('tr');
-        function addColumn(text){
+
+        function addColumn(text) {
           let td = document.createElement('td');
           td.textContent = text;
           tr.appendChild(td);
@@ -50,6 +51,7 @@
         };
 
         Object.assign(userData, data[user]);
+        tr.dataset.winPercentage = parseInt(100 * userData.wins / (userData.wins + userData.looses));
 
         for (let header of headers)
           switch (header) {
@@ -70,22 +72,25 @@
               break;
             default:
               addColumn('');
-        }
+          }
         rows.push(tr);
       }
       tbody.innerHTML = "";
       let headerRow = document.createElement('tr');
-      for (let header of headers){
+      for (let header of headers) {
         let td = document.createElement('th');
         td.textContent = header;
         headerRow.appendChild(td);
       }
       tbody.appendChild(headerRow);
+      rows.sort((a, b) => {
+        return parseInt(b.dataset.winPercentage) - parseInt(a.dataset.winPercentage);
+      });
       for (let row of rows)
         tbody.appendChild(row);
     }
 
-    function fetchData(){
+    function fetchData() {
       console.log('Requesting');
       var xmlHttp = new XMLHttpRequest();
       xmlHttp.onreadystatechange = function() {
