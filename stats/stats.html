@@ -11,14 +11,6 @@
     <h1>BattleShips - results</h1>
     <table>
       <tbody id="tbody">
-        <tr>
-          <th>Name</th>
-          <th>Wins</th>
-        </tr>
-        <tr>
-          <td>This</td>
-          <td>That</td>
-        </tr>
       </tbody>
     </table>
   </div>
@@ -101,6 +93,7 @@
       xmlHttp.send(null);
     }
 
+    paintTable({});
     fetchData();
     setInterval(fetchData, refreshSeconds * 1000);
   </script>
