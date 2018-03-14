@@ -17,6 +17,8 @@ const Client = function(socket) {
   this.gameCompleted = false;
   this.challengedBy = [];
 
+  tthis = this;
+
   /**
    *  Emits clientĹist with list of all current clients in lobby
    */
@@ -125,8 +127,12 @@ const Client = function(socket) {
           }
         });
         this.socket.on('shotFired', (field) => {
+          statictics[tthis.name].shotFired ++;
+          statictics[tthis.opponent.name].shotsTaken ++;
           for (let ship of this.opponent.board)
             if (field in ship.fields) {
+              statictics[tthis.name].shotsFiredHit ++;
+              statictics[tthis.opponent.name].shotsTakenHit ++;
               ship.fieldsLeft = ship.fieldsLeft.filter(n => n !== field);
               if (ships.fieldsLeft.length === 0) {
                 this.opponent.socket.emit('shipSunk', {
@@ -142,6 +148,8 @@ const Client = function(socket) {
                 if (this.hasAliveShip())
                   return;
                 // All my people are dead! The other guy wony
+                statictics[tthis.name].wins ++;
+                statictics[tthis.opponent.name].looses ++;
                 this.opponent.socket.emit('gameFinished', {
                   youAreTheWinner: true
                 });
@@ -175,8 +183,11 @@ const Client = function(socket) {
 
       // Leaving battle
       if ((this.room !== null) && (this.room.startsWith('battle-'))) {
-        if (!this.gameCompleted)
+        if (!this.gameCompleted){
           this.opponent.socket.emit('opponentLeft', null);
+          statictics[this.opponent.name].wins ++;
+          statictics[this.name].looses ++;
+        }
         /* FIXME why does this not work
         this.socket.off('draftCompleted');
         this.socket.off('shotFired');
@@ -234,10 +245,10 @@ const statictics = {
   Boy1: {
     wins: 5,
     looses: 4,
-    shotsFired: 14,
-    shotsFiredHit: 3,
-    shotsTaken: 16,
-    shotsTakenHit: 4
+    shotsFired: 16,
+    shotsFiredHit: 4,
+    shotsTaken: 14,
+    shotsTakenHit: 3
   },
   Boy2: {
     wins: 4,
@@ -319,6 +330,14 @@ io.on('connection', function(socket) {
     socket.emit('profileSet', 'You may proceed');
     clientCurr.switchRoom('lobby');
     clientCurr.sendClientsList();
+    statictics[data.name] = {
+      wins: 0,
+      looses: 0,
+      shotsFired: 0,
+      shotsFiredHit: 0,
+      shotsTaken: 0,
+      shotsTakenHit: 0
+    };
 
     console.log(`[${moment().format('HH:mm:ss')}] -- online: ${clients
       .map(client => client.name)

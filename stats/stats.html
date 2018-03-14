@@ -26,20 +26,67 @@
 
   <script>
     const refreshSeconds = 10;
-    const tbody = querySelector('#tbody')
+    const tbody = document.querySelector('#tbody')
 
     function paintTable(data) {
-      tbody.innerHTML = "";
+      let rows = [];
+      let headers = ['Name', 'Games', 'Wins', 'Shots fired (accuracy)', 'Shots taken (avoidance)']
       for (user of Object.keys(data)) {
         let tr = document.createElement('tr');
-        let td = document.createElement('td');
-        td.textContent = user;
-        tr.appendChild(td);
-        tbody.appendChild(td);
+        function addColumn(text){
+          let td = document.createElement('td');
+          td.textContent = text;
+          tr.appendChild(td);
+        }
+
+        let userData = {
+          name: user,
+          wins: 0,
+          looses: 0,
+          shotsFired: 0,
+          shotsFiredHit: 0,
+          shotsTaken: 0,
+          shotsTakenHit: 0
+        };
+
+        Object.assign(userData, data[user]);
+
+        for (let header of headers)
+          switch (header) {
+            case 'Name':
+              addColumn(user);
+              break;
+            case 'Wins':
+              addColumn(`${userData.wins} (${parseInt(100 * userData.wins / (userData.wins + userData.looses))}%)`);
+              break;
+            case 'Games':
+              addColumn(`${userData.wins + userData.looses}`);
+              break;
+            case 'Shots fired (accuracy)':
+              addColumn(`${userData.shotsFired} (${parseInt(100 * userData.shotsFiredHit / (userData.shotsFired + userData.shotsFiredHit))}%)`);
+              break;
+            case 'Shots taken (avoidance)':
+              addColumn(`${userData.shotsTaken} (${parseInt(100 * userData.shotsTakenHit / (userData.shotsTaken + userData.shotsTakenHit))}%)`);
+              break;
+            default:
+              addColumn('');
+        }
+        rows.push(tr);
       }
+      tbody.innerHTML = "";
+      let headerRow = document.createElement('tr');
+      for (let header of headers){
+        let td = document.createElement('th');
+        td.textContent = header;
+        headerRow.appendChild(td);
+      }
+      tbody.appendChild(headerRow);
+      for (let row of rows)
+        tbody.appendChild(row);
     }
 
-    setInterval(() => {
+    function fetchData(){
+      console.log('Requesting');
       var xmlHttp = new XMLHttpRequest();
       xmlHttp.onreadystatechange = function() {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
@@ -47,7 +94,10 @@
       }
       xmlHttp.open("GET", "/api/stats", true);
       xmlHttp.send(null);
-    }, refreshSeconds * 1000);
+    }
+
+    fetchData();
+    setInterval(fetchData, refreshSeconds * 1000);
   </script>
 </body>
 
