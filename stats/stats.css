@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css?family=Inconsolata:400,700&subset=latin-ext');
+
+html {
+  background: #43513b;
+  display: flex;
+  justify-content: center;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  width: 210mm;
+  height: 297mm;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: white;
+}
+
+.pageContent {
+  font-family: 'Inconsolata', monospace;
+  width: 80%;
+  height: 90%;
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  text-align: center;
+}
+
+.basicData {
+  display: flex;
+  justify-content: space-between;
+}
+
+table {
+  width: 100%;
+}
+
+td, th {
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+tr {
+  border: 100px solid #000000;
+}
+
+.basicText {
+  min-width: 50%;
+}
+
+.trmain {
+  font-weight: bold;
+}
+
+.table {
+  width: 100%;
+  display: flex;
+  padding-bottom: 25px;
+}
+
+.table .tr:nth-child(odd) {
+  border-right: none;
+}
+
+a {
+  color: #008b8b;
+}
+
+img {
+  display: block;
+  width: 35%;
+  height: auto;
+  object-fit: contain;
+}
+
+ul {
+    list-style: '- ';
+    margin: 0px;
+    padding-left: 10px;
+}

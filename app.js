@@ -35,141 +35,167 @@ const Client = function(socket) {
    * Changes room, sending requiered events
    */
   this.switchRoom = (room) => {
-    if (this.room !== null)
-      this.socket.leave(room);
+      if (this.room !== null)
+        this.socket.leave(room);
 
-    // Entering the lobby
-    if (room === 'lobby') {
-      io.sockets.in(room).emit('clientJoinedLobby', {
-        'name': this.name,
-        'nationality': this.nationality
-      });
-
-      // Clients wants to challenge somebody
-      this.socket.on('gameChallenge', (opponentName) => {
-        let opponent = Client.clientByName(opponentName, room);
-        if (opponent === null){
-          this.socket.emit('gameChallengeDecline', data);
-          return;
-        }
-        // Asked opponent is in lobby, send him a challenge message with our name
-        opponent.socket.emit('gameChallenge', this.name);
-      });
-
-      // This stranger is not worth of my time, do not battle him
-      this.socket.on('gameChallengeDecline', (notWorthyMyAttentionName) => {
-        let opponent = Client.clientByName(notWorthyMyAttentionName, room);
-        if (opponent === null)
-          return;
-        opponent.socket.emit('gameChallengeDecline', this.name);
-      });
-
-      // This seems like an interesting challenge!
-      this.socket.on('gameChallengeAccept', (opponentName) => {
-        /*
-        Create separate room for battle with "battle-" prefix and emit gameStarting in the room
-        Data for gameStarting event are list of the clients names and nationalities
-        */
-        let opponent = Client.clientByName(opponentName, room);
-        if (opponent === null)
-          return;
-        let battleRoomName = "";
-        do{
-          battleRoomName = "battle-" + uuid();
-        } while(battleRoomName in Object.keys(battles));
-        battles[battleRoomName] = [this, opponent];
-        this.opponent = opponent;
-        opponent.opponent = this;
-        this.switchRoom(battleRoomName);
-        opponent.switchRoom(battleRoomName);
-        io.sockets.in(battleRoomName).emit('gameStarting', [{
+      // Entering the lobby
+      if (room === 'lobby') {
+        io.sockets.in(room).emit('clientJoinedLobby', {
           'name': this.name,
-          'nationality': this.nationality,
-          'you': true
-        }, {
-          'name': opponent.name,
-          'nationality': opponent.nationality,
-          'you': false
-        }]);
-      });
-    }
+          'nationality': this.nationality
+        });
 
-    // Leaving the lobby
-    if (this.room === 'lobby') {
-      // this.socket.off('gameChallenge'); // FIXME Why does this not work?
-      io.sockets.in(this.room).emit('clientLeftLobby', {
-        'name': this.name,
-        'nationality': this.nationality
-      });
-      this.declineAllChallenges();
-    }
-
-
-    // Entering battle
-    if (room.startsWith('battle-')){
-      this.gameCompleted = false;
-      this.hasTurn = false;
-      this.socket.on('draftCompleted', (board) => {
-        this.board = board;
-
-        // You drafter first, you get your turn
-        if (this.opponent.board === null)
-          this.hasTurn = true;
-        else { // ok, you were late, but still. It's time to start this party
-          this.socket.emit('opponentReady', {'you': false});
-          this.opponent.socket.emit('opponentReady', {'you': true});
-        }
-      });
-      this.socket.on('shotFired', (field) => {
-        for (let ship of this.opponent.board)
-          if (field in ship.fields){
-            ship.fieldsLeft = ship.fieldsLeft.filter(n => n !== field);
-            if (ships.fieldsLeft.length === 0){
-              this.opponent.socket.emit('shipSunk', {wasItYourShot: false, ship});
-              this.socket.emit('shipSunk', {wasItYourShot: true, ship});
-
-              // Test if alteast one ship lefts
-              if (this.hasAliveShip())
-                return;
-              // All my people are dead! The other guy wony
-              this.opponent.socket.emit('gameFinished', {youAreTheWinner: true});
-              this.socket.emit('gameFinished', {youAreTheWinner: false});
-              this.gameCompleted = true;
-              this.opponent.gameCompleted = true;
-              return;
-            }
-            this.opponent.socket.emit('shotHit', {wasItYourShot: false, field});
-            this.socket.emit('shotHit', {wasItYourShot: true, field});
+        // Clients wants to challenge somebody
+        this.socket.on('gameChallenge', (opponentName) => {
+          let opponent = Client.clientByName(opponentName, room);
+          if (opponent === null) {
+            this.socket.emit('gameChallengeDecline', data);
             return;
           }
-        this.opponent.socket.emit('shotMissed', {wasItYourShot: false, field});
-        this.socket.emit('shotMissed', {wasItYourShot: true, field});
-      });
+          // Asked opponent is in lobby, send him a challenge message with our name
+          opponent.socket.emit('gameChallenge', this.name);
+        });
+
+        // This stranger is not worth of my time, do not battle him
+        this.socket.on('gameChallengeDecline', (notWorthyMyAttentionName) => {
+          let opponent = Client.clientByName(notWorthyMyAttentionName, room);
+          if (opponent === null)
+            return;
+          opponent.socket.emit('gameChallengeDecline', this.name);
+        });
+
+        // This seems like an interesting challenge!
+        this.socket.on('gameChallengeAccept', (opponentName) => {
+          /*
+          Create separate room for battle with "battle-" prefix and emit gameStarting in the room
+          Data for gameStarting event are list of the clients names and nationalities
+          */
+          let opponent = Client.clientByName(opponentName, room);
+          if (opponent === null)
+            return;
+          let battleRoomName = "";
+          do {
+            battleRoomName = "battle-" + uuid();
+          } while (battleRoomName in Object.keys(battles));
+          battles[battleRoomName] = [this, opponent];
+          this.opponent = opponent;
+          opponent.opponent = this;
+          this.switchRoom(battleRoomName);
+          opponent.switchRoom(battleRoomName);
+          io.sockets.in(battleRoomName).emit('gameStarting', [{
+            'name': this.name,
+            'nationality': this.nationality,
+            'you': true
+          }, {
+            'name': opponent.name,
+            'nationality': opponent.nationality,
+            'you': false
+          }]);
+        });
+      }
+
+      // Leaving the lobby
+      if (this.room === 'lobby') {
+        // this.socket.off('gameChallenge'); // FIXME Why does this not work?
+        io.sockets.in(this.room).emit('clientLeftLobby', {
+          'name': this.name,
+          'nationality': this.nationality
+        });
+        this.declineAllChallenges();
+      }
+
+
+      // Entering battle
+      if ((room !== null) && (room.startsWith('battle-'))) {
+        this.gameCompleted = false;
+        this.hasTurn = false;
+        this.socket.on('draftCompleted', (board) => {
+          this.board = board;
+
+          // You drafter first, you get your turn
+          if (this.opponent.board === null)
+            this.hasTurn = true;
+          else { // ok, you were late, but still. It's time to start this party
+            this.socket.emit('opponentReady', {
+              'you': false
+            });
+            this.opponent.socket.emit('opponentReady', {
+              'you': true
+            });
+          }
+        });
+        this.socket.on('shotFired', (field) => {
+          for (let ship of this.opponent.board)
+            if (field in ship.fields) {
+              ship.fieldsLeft = ship.fieldsLeft.filter(n => n !== field);
+              if (ships.fieldsLeft.length === 0) {
+                this.opponent.socket.emit('shipSunk', {
+                  wasItYourShot: false,
+                  ship
+                });
+                this.socket.emit('shipSunk', {
+                  wasItYourShot: true,
+                  ship
+                });
+
+                // Test if alteast one ship lefts
+                if (this.hasAliveShip())
+                  return;
+                // All my people are dead! The other guy wony
+                this.opponent.socket.emit('gameFinished', {
+                  youAreTheWinner: true
+                });
+                this.socket.emit('gameFinished', {
+                  youAreTheWinner: false
+                });
+                this.gameCompleted = true;
+                this.opponent.gameCompleted = true;
+                return;
+              }
+              this.opponent.socket.emit('shotHit', {
+                wasItYourShot: false,
+                field
+              });
+              this.socket.emit('shotHit', {
+                wasItYourShot: true,
+                field
+              });
+              return;
+            }
+          this.opponent.socket.emit('shotMissed', {
+            wasItYourShot: false,
+            field
+          });
+          this.socket.emit('shotMissed', {
+            wasItYourShot: true,
+            field
+          });
+        });
+      }
+
+      // Leaving battle
+      if ((this.room !== null) && (this.room.startsWith('battle-'))) {
+        if (!this.gameCompleted)
+          this.opponent.socket.emit('opponentLeft', null);
+        /* FIXME why does this not work
+        this.socket.off('draftCompleted');
+        this.socket.off('shotFired');
+         */
+      }
+
+      this.room = room;
+      if (room !== null)
+        this.socket.join(room);
+    },
+
+    /**
+     * Declines all pending challenges from other players
+     * @return {undefined}
+     */
+    this.declineAllChallenges = () => {
+      for (let client of this.challengedBy)
+        client.socket.emit('gameChallengeDecline', this.name);
     }
-
-    // Leaving battle
-    if ((this.room !== null) && (this.room.startsWith('battle-'))){
-      if (!this.gameCompleted)
-        this.opponent.socket.emit('opponentLeft', null);
-      /* FIXME why does this not work
-      this.socket.off('draftCompleted');
-      this.socket.off('shotFired');
-       */
-    }
-
-    this.room = room;
-    if (room !== null)
-      this.socket.join(room);
-  },
-
-  /**
-   * Declines all pending challenges from other players
-   * @return {undefined}
-   */
-  this.declineAllChallenges = ()=>{
-    for (let client of this.challengedBy)
-      client.socket.emit('gameChallengeDecline', this.name);
-  }
 
   /**
    * Test if player has still atleast one living (not sunk) ship
@@ -202,11 +228,44 @@ Client.clientByName = function(clientName, room) {
 
 const clients = []; // list of all conected Client instances
 
-const battles = {};
+const battles = {}; // list of all battle rooms
+
+const statictics = {
+  Boy1: {
+    wins: 5,
+    looses: 4,
+    shotsFired: 14,
+    shotsFiredHit: 3,
+    shotsTaken: 16,
+    shotsTakenHit: 4
+  },
+  Boy2: {
+    wins: 4,
+    looses: 5,
+    shotsFired: 14,
+    shotsFiredHit: 3,
+    shotsTaken: 16,
+    shotsTakenHit: 4
+  }
+};
+
+app.get('/stats', function(req, res) {
+  res.sendFile(__dirname + '/stats/stats.html');
+});
+
+app.get('/stats.css', function(req, res) {
+  res.sendFile(__dirname + '/stats/stats.css');
+});
+
+app.get('/test', function(req, res) {
+  res.sendFile(__dirname + '/test.html');
+});
+
 
 app.get('*', function(req, res) {
   res.sendFile(__dirname + '/index.html');
 });
+
 
 io.on('connection', function(socket) {
   // Initialize new client and add himto into global list of clients
