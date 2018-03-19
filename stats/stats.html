@@ -14,7 +14,10 @@
       </tbody>
     </table>
   </div>
-  </div>
+
+  <!--<div class="footer">
+    <button id='btnPrint'>Print</button>
+  </div>-->
 
   <script>
     const refreshSeconds = 10;
@@ -22,7 +25,7 @@
 
     function paintTable(data) {
       let rows = [];
-      let headers = ['Name', 'Games', 'Wins', 'Shots fired (accuracy)', 'Shots taken (avoidance)']
+      let headers = ['Name', 'Games', 'Wins', 'Shots fired (accuracy)', 'Shots taken (accuracy)']
       for (user of Object.keys(data)) {
         let tr = document.createElement('tr');
 
@@ -44,6 +47,7 @@
 
         Object.assign(userData, data[user]);
         tr.dataset.winPercentage = parseInt(100 * userData.wins / (userData.wins + userData.looses));
+        tr.dataset.wins = userData.wins;
 
         for (let header of headers)
           switch (header) {
@@ -59,7 +63,7 @@
             case 'Shots fired (accuracy)':
               addColumn(`${userData.shotsFired} (${parseInt(100 * userData.shotsFiredHit / (userData.shotsFired + userData.shotsFiredHit))}%)`);
               break;
-            case 'Shots taken (avoidance)':
+            case 'Shots taken (accuracy)':
               addColumn(`${userData.shotsTaken} (${parseInt(100 * userData.shotsTakenHit / (userData.shotsTaken + userData.shotsTakenHit))}%)`);
               break;
             default:
@@ -75,8 +79,10 @@
         headerRow.appendChild(td);
       }
       tbody.appendChild(headerRow);
+
+      // Sort by the count of wins
       rows.sort((a, b) => {
-        return parseInt(b.dataset.winPercentage) - parseInt(a.dataset.winPercentage);
+        return parseInt(b.dataset.wins) - parseInt(a.dataset.wins);
       });
       for (let row of rows)
         tbody.appendChild(row);

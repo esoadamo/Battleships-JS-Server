@@ -88,3 +88,9 @@ ul {
     margin: 0px;
     padding-left: 10px;
 }
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+}
