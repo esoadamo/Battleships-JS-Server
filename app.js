@@ -325,12 +325,7 @@ io.on('connection', function(socket) {
 
     // Set client's data and emit success
     clientCurr.name = data['name'];
-    clientCurr.nationality = data['nationality'];
-    clientCurr.dataSet = true;
-    socket.emit('profileSet', 'You may proceed');
-    clientCurr.switchRoom('lobby');
-    clientCurr.sendClientsList();
-    statictics[data.name] = {
+    statictics[clientCurr.name] = {
       wins: 0,
       looses: 0,
       shotsFired: 0,
@@ -338,6 +333,11 @@ io.on('connection', function(socket) {
       shotsTaken: 0,
       shotsTakenHit: 0
     };
+    clientCurr.nationality = data['nationality'];
+    clientCurr.dataSet = true;
+    socket.emit('profileSet', 'You may proceed');
+    clientCurr.switchRoom('lobby');
+    clientCurr.sendClientsList();
 
     console.log(`[${moment().format('HH:mm:ss')}] -- online: ${clients
       .map(client => client.name)
