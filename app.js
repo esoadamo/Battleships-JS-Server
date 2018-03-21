@@ -119,10 +119,12 @@ const Client = function(socket) {
             this.hasTurn = true;
           else { // ok, you were late, but still. It's time to start this party
             this.socket.emit('opponentReady', {
-              'you': false
+              'you': false,
+              'opponent': this.opponent.name
             });
             this.opponent.socket.emit('opponentReady', {
-              'you': true
+              'you': true,
+              'opponent': this.name
             });
           }
         });
