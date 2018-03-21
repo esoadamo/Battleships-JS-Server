@@ -137,7 +137,7 @@ const Client = function(socket) {
             if (ship.fields.indexOf(field) !== -1) {
               statictics[tthis.name].shotsFiredHit ++;
               statictics[tthis.opponent.name].shotsTakenHit ++;
-              ship.fieldsLeft.splice(ship.fields.indexOf(field), 1);
+              ship.fieldsLeft.splice(ship.fieldsLeft.indexOf(field), 1);
               if (ship.fieldsLeft.length === 0) {
                 this.opponent.socket.emit('shipSunk', {
                   wasItYourShot: false,
