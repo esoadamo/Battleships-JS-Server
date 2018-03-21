@@ -129,6 +129,8 @@ const Client = function(socket) {
           }
         });
         this.socket.on('shotFired', (field) => {
+          console.log(`someone just fired at ${field}`);
+          console.log(this.opponent.board);
           statictics[tthis.name].shotFired ++;
           statictics[tthis.opponent.name].shotsTaken ++;
           for (let ship of this.opponent.board)
@@ -136,7 +138,7 @@ const Client = function(socket) {
               statictics[tthis.name].shotsFiredHit ++;
               statictics[tthis.opponent.name].shotsTakenHit ++;
               ship.fieldsLeft = ship.fieldsLeft.filter(n => n !== field);
-              if (ships.fieldsLeft.length === 0) {
+              if (ship.fieldsLeft.length === 0) {
                 this.opponent.socket.emit('shipSunk', {
                   wasItYourShot: false,
                   ship
