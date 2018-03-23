@@ -6,6 +6,8 @@ const uuid = require('uuid/v4');
 
 const PORT = 3000; // server port
 
+// TO-DO updated logging icons
+
 const Client = function(socket) {
   this.name = null; // unique name of the client
   this.socket = socket; // socket he has connected from
@@ -84,6 +86,7 @@ const Client = function(socket) {
           opponent.opponent = this;
           this.switchRoom(battleRoomName);
           opponent.switchRoom(battleRoomName);
+          console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} and ${this.opponent.name} have entered draft phase`);
           io.sockets.in(battleRoomName).emit('gameStarting', [{
             'name': this.name,
             'nationality': this.nationality,
@@ -112,12 +115,14 @@ const Client = function(socket) {
         this.gameCompleted = false;
         this.hasTurn = false;
         this.socket.on('draftCompleted', (board) => {
+          console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} has completed their draft`);
           this.board = board;
 
           // You drafter first, you get your turn
           if (this.opponent.board === null)
             this.hasTurn = true;
           else { // ok, you were late, but still. It's time to start this party
+            console.log(`[${moment().format('HH:mm:ss')}] →  starting game between ${this.opponent.name} and ${this.name}`);
             this.socket.emit('opponentReady', {
               'you': false,
               'opponent': this.opponent.name
@@ -129,8 +134,6 @@ const Client = function(socket) {
           }
         });
         this.socket.on('shotFired', (field) => {
-          console.log(`someone just fired at ${field}`);
-          console.log(this.opponent.board);
           statictics[tthis.name].shotFired ++;
           statictics[tthis.opponent.name].shotsTaken ++;
           for (let ship of this.opponent.board)
@@ -138,7 +141,9 @@ const Client = function(socket) {
               statictics[tthis.name].shotsFiredHit ++;
               statictics[tthis.opponent.name].shotsTakenHit ++;
               ship.fieldsLeft.splice(ship.fieldsLeft.indexOf(field), 1);
+
               if (ship.fieldsLeft.length === 0) {
+                console.log(`[${moment().format('HH:mm:ss')}] →  ${this.opponent.name}'s ship has just sunk`);
                 this.opponent.socket.emit('shipSunk', {
                   wasItYourShot: false,
                   ship
@@ -154,6 +159,7 @@ const Client = function(socket) {
                 // All my people are dead! The other guy wony
                 statictics[tthis.name].wins ++;
                 statictics[tthis.opponent.name].looses ++;
+                console.log(`[${moment().format('HH:mm:ss')}] →  ${this.opponent.name} has won the battle`);
                 this.opponent.socket.emit('gameFinished', {
                   youAreTheWinner: true
                 });
@@ -164,6 +170,7 @@ const Client = function(socket) {
                 this.opponent.gameCompleted = true;
                 return;
               }
+              console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} just fired at ${this.opponent.name}'s field ${field} (hit)`);
               this.opponent.socket.emit('shotHit', {
                 wasItYourShot: false,
                 field
@@ -174,6 +181,7 @@ const Client = function(socket) {
               });
               return;
             }
+            console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} just fired at ${this.opponent.name}'s field ${field} (miss)`);
           this.opponent.socket.emit('shotMissed', {
             wasItYourShot: false,
             field
@@ -323,7 +331,7 @@ io.on('connection', function(socket) {
         return;
       }
 
-    console.log(`[${moment().format('HH:mm:ss')}] →  ${data['name']} (${data['nationality']}) joined`);
+    console.log(`[${moment().format('HH:mm:ss')}] →  ${data['name']} (${data['nationality']}) joined the lobby`);
 
     // Set client's data and emit success
     clientCurr.name = data['name'];
@@ -340,11 +348,6 @@ io.on('connection', function(socket) {
     socket.emit('profileSet', 'You may proceed');
     clientCurr.switchRoom('lobby');
     clientCurr.sendClientsList();
-
-    console.log(`[${moment().format('HH:mm:ss')}] -- online: ${clients
-      .map(client => client.name)
-      .filter(client => client !== null)
-      .join(', ')}\n`);
   }); // End of .on('setProfile' event
 
   /*
@@ -354,13 +357,9 @@ io.on('connection', function(socket) {
     console.log(clientCurr.name !== null ? `[${moment().format('HH:mm:ss')}] ←  ${clientCurr.name} left` : '←  undefined left');
     clientCurr.switchRoom(null);
     clients.splice(clients.indexOf(clientCurr), 1); // remove client from array. He is dead for me now.
-    console.log(`[${moment().format('HH:mm:ss')}] -- online: ${clients
-      .map(client => client.name)
-      .filter(client => client !== null)
-      .join(', ')}\n`);
   });
 });
 
 http.listen(PORT, function() {
-  console.log(`Live on http://localhost:${PORT}`);
+  console.log(`[${moment().format('HH:mm:ss')}] →  game server has gone live on localhost:${PORT}`);
 });
