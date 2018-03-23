@@ -353,7 +353,7 @@ io.on('connection', function(socket) {
   It is sad, but the socket left us alone. Let's tell everybody the name of the One who left our party. (Or say nothing, if we didn't know his name)
   */
   socket.on('disconnect', function() {
-    console.log(clientCurr.name !== null ? `[${moment().format('HH:mm:ss')}] ←  ${clientCurr.name} left` : '←  undefined left');
+    console.log(`[${moment().format('HH:mm:ss')}] ←  ${clientCurr.name !== null ? clientCurr.name : 'undefined'} left`);
     clientCurr.switchRoom(null);
     clients.splice(clients.indexOf(clientCurr), 1); // remove client from array. He is dead for me now.
   });
