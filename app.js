@@ -234,7 +234,7 @@ const clients = []; // list of all conected Client instances
 
 const battles = {}; // list of all battle rooms
 
-const stats = {
+let stats = {
   /* Example content
   Boy1: {
     wins: 4,
@@ -255,13 +255,15 @@ const stats = {
   */
 };
 
-app.get('/stats', function(req, res) {
-  res.sendFile(__dirname + '/stats/stats.html');
-});
-
 app.get('/api/stats', function(req, res) {
   res.header("Content-Type", "text/json");
   res.send(JSON.stringify(stats));
+});
+
+app.get('/api/stats/reset', function(req, res) {
+  res.header("Content-Type", "text/plain");
+  res.send('Sure.');
+  stats = {};
 });
 
 app.get('/stats.css', function(req, res) {
@@ -269,7 +271,7 @@ app.get('/stats.css', function(req, res) {
 });
 
 app.get('*', function(req, res) {
-  res.sendFile(__dirname + '/index.html');
+  res.sendFile(__dirname + '/stats/stats.html');
 });
 
 
