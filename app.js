@@ -136,11 +136,11 @@ const Client = function(socket) {
         this.socket.on('shotFired', (field) => {
           statictics[tthis.name].shotFired++;
           statictics[tthis.opponent.name].shotsTaken++;
-          for (let ship of this.opponent.board)
+          this.opponent.board.forEach((ship, index) => {
             if (ship.fields.indexOf(field) !== -1) {
               statictics[tthis.name].shotsFiredHit++;
               statictics[tthis.opponent.name].shotsTakenHit++;
-              ship.fieldsLeft.splice(ship.fieldsLeft.indexOf(field), 1);
+              this.opponent.board[index].fieldsLeft.splice(ship.fieldsLeft.indexOf(field), 1);
 
               if (ship.fieldsLeft.length === 0) {
                 console.log(`[${moment().format('HH:mm:ss')}] →  ${this.opponent.name}'s ship has just sunk`);
@@ -181,6 +181,7 @@ const Client = function(socket) {
               });
               return;
             }
+          });
           console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} just fired at ${this.opponent.name}'s field ${field} (miss)`);
           this.opponent.socket.emit('shotMissed', {
             wasItYourShot: false,
