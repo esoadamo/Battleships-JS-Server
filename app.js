@@ -147,13 +147,13 @@ const Client = function(socket) {
 
           if (includes === null) {
             console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} just fired at ${this.opponent.name}'s field ${field} (and missed)`);
-            
+
             this.socket.emit('shotMissed', { field, wasItYourShot: true });
             this.opponent.socket.emit('shotMissed', { field, wasItYourShot: false });
           } else {
             if (!includes.fieldsLeft.length) {
               console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} just fired at ${this.opponent.name}'s field ${field} (and sunk his ship)`);
-              
+
               const ship = includes;
               this.socket.emit('shipSunk', { ship, wasItYourShot: true });
               this.opponent.socket.emit('shipSunk', { ship, wasItYourShot: false });
@@ -165,13 +165,13 @@ const Client = function(socket) {
 
               if (!shipsLeft) {
                 console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} has won the battle`);
-                
+
                 this.socket.emit('gameFinished', { youAreTheWinner: true });
                 this.opponent.socket.emit('gameFinished', { youAreTheWinner: false });
 
                 stats[this.name].wins++;
                 stats[this.opponent.name].looses++;
-    
+
                 this.gameCompleted = true;
                 this.opponent.gameCompleted = true;
                 this.switchRoom(null);
@@ -231,6 +231,7 @@ const clients = []; // list of all conected Client instances
 const battles = {}; // list of all battle rooms
 
 const stats = {
+  /* Example content
   Boy1: {
     wins: 4,
     looses: 5,
@@ -247,6 +248,7 @@ const stats = {
     shotsTaken: 16,
     shotsTakenHit: 4
   }
+  */
 };
 
 app.get('/stats', function(req, res) {
