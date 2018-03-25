@@ -1,10 +1,10 @@
 const app = require('express')();
 const http = require('http').Server(app);
-const io = require('socket.io')(http);
+const io = require('socket.io')(http, {origins: '*:*'});
 const moment = require('moment');
 const uuid = require('uuid/v4');
 
-const PORT = 3000; // server port
+const PORT = 8473; // server port
 
 // TO-DO updated logging icons
 
