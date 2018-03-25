@@ -225,9 +225,18 @@ const Client = function(socket) {
   this.hasAliveShip = () => {
     if (this.board === null)
       return false;
-    for (let ship of this.board)
-      if (ship.fieldsLeft.length)
+    console.log('DEBUG: Has alive ships?');
+    console.log(JSON.stringify(this.board));
+    for (let ship of this.board) {
+      console.log(JSON.stringify(ship.fieldsLeft));
+      console.log(ship.fieldsLeft.length);
+      if (ship.fieldsLeft.length) {
+        console.log('Alive');
         return true;
+      }
+      console.log('Dead');
+    }
+    console.log('All dead');
     return false;
   }
 }
