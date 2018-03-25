@@ -19,8 +19,6 @@ const Client = function(socket) {
   this.gameCompleted = false;
   this.challengedBy = [];
 
-  tthis = this;
-
   /**
    *  Emits clientĹist with list of all current clients in lobby
    */
@@ -135,8 +133,8 @@ const Client = function(socket) {
         });
 
         this.socket.on('shotFired', field => {
-          statictics[tthis.name].shotFired++;
-          statictics[tthis.opponent.name].shotsTaken++;
+          stats[this.name].shotFired++;
+          stats[this.opponent.name].shotsTaken++;
 
           let includes = null;
 
@@ -171,8 +169,8 @@ const Client = function(socket) {
                 this.socket.emit('gameFinished', { youAreTheWinner: true });
                 this.opponent.socket.emit('gameFinished', { youAreTheWinner: false });
 
-                statictics[tthis.name].wins++;
-                statictics[tthis.opponent.name].looses++;
+                stats[this.name].wins++;
+                stats[this.opponent.name].looses++;
     
                 this.gameCompleted = true;
                 this.opponent.gameCompleted = true;
@@ -191,8 +189,8 @@ const Client = function(socket) {
       if ((this.room !== null) && (this.room.startsWith('battle-'))) {
         if (!this.gameCompleted) {
           this.opponent.socket.emit('opponentLeft', null);
-          statictics[this.opponent.name].wins++;
-          statictics[this.name].looses++;
+          stats[this.opponent.name].wins++;
+          stats[this.name].looses++;
         }
         this.socket.removeAllListeners('draftCompleted');
         this.socket.removeAllListeners('shotFired');
@@ -254,7 +252,7 @@ const clients = []; // list of all conected Client instances
 
 const battles = {}; // list of all battle rooms
 
-const statictics = {
+const stats = {
   Boy1: {
     wins: 4,
     looses: 5,
@@ -279,7 +277,7 @@ app.get('/stats', function(req, res) {
 
 app.get('/api/stats', function(req, res) {
   res.header("Content-Type", "text/json");
-  res.send(JSON.stringify(statictics));
+  res.send(JSON.stringify(stats));
 });
 
 app.get('/stats.css', function(req, res) {
@@ -336,8 +334,8 @@ io.on('connection', function(socket) {
 
     // Set client's data and emit success
     clientCurr.name = data['name'];
-    if (!(clientCurr.name in statictics))
-      statictics[clientCurr.name] = {
+    if (!(clientCurr.name in stats))
+      stats[clientCurr.name] = {
         wins: 0,
         looses: 0,
         shotsFired: 0,
