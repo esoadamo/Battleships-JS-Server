@@ -167,6 +167,7 @@ const Client = function(socket) {
                   });
                   this.gameCompleted = true;
                   this.opponent.gameCompleted = true;
+                  this.switchRoom(null);
                 }
               }
               console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} just fired at ${this.opponent.name}'s field ${field} (hit)`);
@@ -282,11 +283,6 @@ app.get('/stats.css', function(req, res) {
   res.sendFile(__dirname + '/stats/stats.css');
 });
 
-app.get('/test', function(req, res) {
-  res.sendFile(__dirname + '/test.html');
-});
-
-
 app.get('*', function(req, res) {
   res.sendFile(__dirname + '/index.html');
 });
@@ -323,25 +319,29 @@ io.on('connection', function(socket) {
       return;
     }
 
-    // Check if name is not already taken
-    for (client of clients)
-      if ((client.name !== null) && (client.name === data['name'])) {
-        socket.emit('profileError', 'Name is already taken');
-        return;
-      }
+    // If this client is already set and has the same name, just reset him
+    if ((clientCurr.name !== null) && (clientCurr.name !== data.name) && (socket === client.socket) && (client.room === null)) {
+      // Check if name is not already taken
+      for (client of clients)
+        if ((client.name !== null) && (client.name === data['name'])) {
+          socket.emit('profileError', 'Name is already taken');
+          return;
+        }
+    }
 
     console.log(`[${moment().format('HH:mm:ss')}] →  ${data['name']} (${data['nationality']}) joined the lobby`);
 
     // Set client's data and emit success
     clientCurr.name = data['name'];
-    statictics[clientCurr.name] = {
-      wins: 0,
-      looses: 0,
-      shotsFired: 0,
-      shotsFiredHit: 0,
-      shotsTaken: 0,
-      shotsTakenHit: 0
-    };
+    if (!(clientCurr.name in statictics))
+      statictics[clientCurr.name] = {
+        wins: 0,
+        looses: 0,
+        shotsFired: 0,
+        shotsFiredHit: 0,
+        shotsTaken: 0,
+        shotsTakenHit: 0
+      };
     clientCurr.nationality = data['nationality'];
     clientCurr.dataSet = true;
     socket.emit('profileSet', 'You may proceed');
