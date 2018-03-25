@@ -133,64 +133,57 @@ const Client = function(socket) {
             });
           }
         });
-        this.socket.on('shotFired', (field) => {
+
+        this.socket.on('shotFired', field => {
           statictics[tthis.name].shotFired++;
           statictics[tthis.opponent.name].shotsTaken++;
-          this.opponent.board.forEach((ship, index) => {
-            if (ship.fields.indexOf(field) !== -1) {
-              statictics[tthis.name].shotsFiredHit++;
-              statictics[tthis.opponent.name].shotsTakenHit++;
-              this.opponent.board[index].fieldsLeft.splice(ship.fieldsLeft.indexOf(field), 1);
 
-              if (ship.fieldsLeft.length === 0) {
-                console.log(`[${moment().format('HH:mm:ss')}] →  ${this.opponent.name}'s ship has just sunk`);
-                this.opponent.socket.emit('shipSunk', {
-                  wasItYourShot: false,
-                  ship
-                });
-                this.socket.emit('shipSunk', {
-                  wasItYourShot: true,
-                  ship
-                });
+          let includes = null;
 
-                // Test if alteast one ship lefts
-                if (!this.hasAliveShip()) {
-                  // All my people are dead! The other guy wony
-                  statictics[tthis.name].wins++;
-                  statictics[tthis.opponent.name].looses++;
-                  console.log(`[${moment().format('HH:mm:ss')}] →  ${this.opponent.name} has won the battle`);
-                  this.opponent.socket.emit('gameFinished', {
-                    youAreTheWinner: true
-                  });
-                  this.socket.emit('gameFinished', {
-                    youAreTheWinner: false
-                  });
-                  this.gameCompleted = true;
-                  this.opponent.gameCompleted = true;
-                  this.switchRoom(null);
-                }
-              }
-              console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} just fired at ${this.opponent.name}'s field ${field} (hit)`);
-              this.opponent.socket.emit('shotHit', {
-                wasItYourShot: false,
-                field
-              });
-              this.socket.emit('shotHit', {
-                wasItYourShot: true,
-                field
-              });
-              return;
+          this.opponent.board.forEach(ship => {
+            if (ship.fieldsLeft.includes(field)) {
+              ship.fieldsLeft = ship.fieldsLeft.filter(n => n !== field);
+              includes = ship;
             }
-          });
-          console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} just fired at ${this.opponent.name}'s field ${field} (miss)`);
-          this.opponent.socket.emit('shotMissed', {
-            wasItYourShot: false,
-            field
-          });
-          this.socket.emit('shotMissed', {
-            wasItYourShot: true,
-            field
-          });
+          })
+
+          if (includes === null) {
+            console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} just fired at ${this.opponent.name}'s field ${field} (and missed)`);
+            
+            this.socket.emit('shotMissed', { field, wasItYourShot: true });
+            this.opponent.socket.emit('shotMissed', { field, wasItYourShot: false });
+          } else {
+            if (!includes.fieldsLeft.length) {
+              console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} just fired at ${this.opponent.name}'s field ${field} (and sunk his ship)`);
+              
+              const ship = includes;
+              this.socket.emit('shipSunk', { ship, wasItYourShot: true });
+              this.opponent.socket.emit('shipSunk', { ship, wasItYourShot: false });
+
+              const shipsLeft = this.opponent.board
+                .map(s => s.fieldsLeft.length > 0)
+                .filter(b => b)
+                .length;
+
+              if (!shipsLeft) {
+                console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} has won the battle`);
+                
+                this.socket.emit('gameFinished', { youAreTheWinner: true });
+                this.opponent.socket.emit('gameFinished', { youAreTheWinner: false });
+
+                statictics[tthis.name].wins++;
+                statictics[tthis.opponent.name].looses++;
+    
+                this.gameCompleted = true;
+                this.opponent.gameCompleted = true;
+                this.switchRoom(null);
+              }
+            }
+            console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} just fired at ${this.opponent.name}'s field ${field} (and hit)`);
+
+            this.socket.emit('shotHit', { field, wasItYourShot: true });
+            this.opponent.socket.emit('shotHit', { field, wasItYourShot: false });
+          }
         });
       }
 
