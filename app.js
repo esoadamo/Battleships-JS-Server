@@ -133,7 +133,7 @@ const Client = function(socket) {
         });
 
         this.socket.on('shotFired', field => {
-          stats[this.name].shotFired++;
+          stats[this.name].shotsFired++;
           stats[this.opponent.name].shotsTaken++;
 
           let includes = null;
@@ -152,6 +152,10 @@ const Client = function(socket) {
             this.opponent.socket.emit('shotMissed', { field, wasItYourShot: false });
           } else {
             if (!includes.fieldsLeft.length) {
+
+              stats[this.name].shotsFiredHit++;
+              stats[this.opponent.name].shotsTakenHit++;
+
               console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} just fired at ${this.opponent.name}'s field ${field} (and sunk his ship)`);
 
               const ship = includes;
