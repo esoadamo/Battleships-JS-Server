@@ -51,7 +51,7 @@ const Client = function(socket) {
         this.socket.on('gameChallenge', (opponentName) => {
           let opponent = Client.clientByName(opponentName, room);
           if (opponent === null) {
-            this.socket.emit('gameChallengeDecline', data);
+            this.socket.emit('gameChallengeDecline', opponentName);
             return;
           }
           // Asked opponent is in lobby, send him a challenge message with our name
