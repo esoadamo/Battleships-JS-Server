@@ -59,7 +59,7 @@
               addColumn(`${userData.score}`);
               break;
             case 'Wins':
-              let percentage = parseInt(100 * userData.wins / (userData.wins + userData.looses));
+              var percentage = parseInt(100 * userData.wins / (userData.wins + userData.looses));
               addColumn(`${userData.wins}` + isNaN(percentage) ? '' : ` (${percentage}%)`);
               break;
             case 'Games':
