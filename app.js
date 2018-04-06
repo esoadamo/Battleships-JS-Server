@@ -1,12 +1,65 @@
 const app = require('express')();
 const http = require('http').Server(app);
-const io = require('socket.io')(http, {origins: '*:*'});
+const io = require('socket.io')(http, {
+  origins: '*:*'
+});
 const moment = require('moment');
 const uuid = require('uuid/v4');
+const fs = require('fs');
 
 const PORT = 8473; // server port
+const FILE_STATSBACKUP = "stats.bk.json";
 
-// TO-DO updated logging icons
+/**
+Backes statistics in case of program being unexpectly teerminated
+**/
+const StatisticBacker = {
+  __writeCompted: true,
+  __rewriteRequired: false,
+
+  /**
+   * Backups current statistics on dics
+   * If this function is called more than once, it queues itself so that every write will be synchronized and the file will not be unparsable
+   * @return {undefined}
+   */
+  backup: () => {
+    if (!StatisticBacker.__writeCompted) {
+      StatisticBacker.__rewriteRequired = true;
+      return;
+    }
+    StatisticBacker.__writeCompted = false;
+    StatisticBacker.__rewriteRequired = false;
+    fs.writeFile(FILE_STATSBACKUP, JSON.stringify(stats), (err) => {
+      if (err)
+        return console.log('Something is messed up in backuping stats');
+      // Do not end in a recursion loop
+      setTimeout(() => {
+        StatisticBacker.__writeCompted = true;
+        if (StatisticBacker.__rewriteRequired)
+          StatisticBacker.backup();
+      }, 1);
+    });
+  },
+
+  /**
+   * Loads statistics from disc if file exists
+   * @return {undefined}
+   */
+  load: () => {
+    if (!fs.existsSync(FILE_STATSBACKUP))
+      return;
+    Object.assign(stats, JSON.parse(fs.readFileSync(FILE_STATSBACKUP, "utf8")));
+  },
+
+  /**
+   * Destroys statistics file if exists
+   * @return {undefined}
+   */
+  destroy: () => {
+    if (!fs.existsSync(FILE_STATSBACKUP))
+      fs.unlink(FILE_STATSBACKUP);
+  }
+}
 
 const Client = function(socket) {
   this.name = null; // unique name of the client
@@ -135,6 +188,7 @@ const Client = function(socket) {
         this.socket.on('shotFired', field => {
           stats[this.name].shotsFired++;
           stats[this.opponent.name].shotsTaken++;
+          StatisticBacker.backup();
 
           let includes = null;
 
@@ -148,19 +202,32 @@ const Client = function(socket) {
           if (includes === null) {
             console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} just fired at ${this.opponent.name}'s field ${field} (and missed)`);
 
-            this.socket.emit('shotMissed', { field, wasItYourShot: true });
-            this.opponent.socket.emit('shotMissed', { field, wasItYourShot: false });
+            this.socket.emit('shotMissed', {
+              field,
+              wasItYourShot: true
+            });
+            this.opponent.socket.emit('shotMissed', {
+              field,
+              wasItYourShot: false
+            });
           } else {
             if (!includes.fieldsLeft.length) {
 
               stats[this.name].shotsFiredHit++;
               stats[this.opponent.name].shotsTakenHit++;
+              StatisticBacker.backup();
 
               console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} just fired at ${this.opponent.name}'s field ${field} (and sunk his ship)`);
 
               const ship = includes;
-              this.socket.emit('shipSunk', { ship, wasItYourShot: true });
-              this.opponent.socket.emit('shipSunk', { ship, wasItYourShot: false });
+              this.socket.emit('shipSunk', {
+                ship,
+                wasItYourShot: true
+              });
+              this.opponent.socket.emit('shipSunk', {
+                ship,
+                wasItYourShot: false
+              });
 
               const shipsLeft = this.opponent.board
                 .map(s => s.fieldsLeft.length > 0)
@@ -170,11 +237,16 @@ const Client = function(socket) {
               if (!shipsLeft) {
                 console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} has won the battle`);
 
-                this.socket.emit('gameFinished', { youAreTheWinner: true });
-                this.opponent.socket.emit('gameFinished', { youAreTheWinner: false });
+                this.socket.emit('gameFinished', {
+                  youAreTheWinner: true
+                });
+                this.opponent.socket.emit('gameFinished', {
+                  youAreTheWinner: false
+                });
 
                 stats[this.name].wins++;
                 stats[this.opponent.name].looses++;
+                StatisticBacker.backup();
 
                 this.gameCompleted = true;
                 this.opponent.gameCompleted = true;
@@ -183,8 +255,14 @@ const Client = function(socket) {
             }
             console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} just fired at ${this.opponent.name}'s field ${field} (and hit)`);
 
-            this.socket.emit('shotHit', { field, wasItYourShot: true });
-            this.opponent.socket.emit('shotHit', { field, wasItYourShot: false });
+            this.socket.emit('shotHit', {
+              field,
+              wasItYourShot: true
+            });
+            this.opponent.socket.emit('shotHit', {
+              field,
+              wasItYourShot: false
+            });
           }
         });
       }
@@ -195,6 +273,7 @@ const Client = function(socket) {
           this.opponent.socket.emit('opponentLeft', null);
           stats[this.opponent.name].wins++;
           stats[this.name].looses++;
+          StatisticBacker.backup();
         }
         this.socket.removeAllListeners('draftCompleted');
         this.socket.removeAllListeners('shotFired');
@@ -264,6 +343,7 @@ app.get('/api/stats/reset', function(req, res) {
   res.header("Content-Type", "text/plain");
   res.send('Sure.');
   stats = {};
+  StatisticBacker.destroy();
 });
 
 app.get('/stats.css', function(req, res) {
@@ -346,6 +426,8 @@ io.on('connection', function(socket) {
   });
 });
 
+console.log(`[${moment().format('HH:mm:ss')}] →  loading possible statistics from the past`);
+StatisticBacker.load();
 http.listen(PORT, function() {
   console.log(`[${moment().format('HH:mm:ss')}] →  game server has gone live on localhost:${PORT}`);
 });
