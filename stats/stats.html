@@ -55,16 +55,19 @@
               addColumn(user);
               break;
             case 'Wins':
-              addColumn(`${userData.wins} (${parseInt(100 * userData.wins / (userData.wins + userData.looses))}%)`);
+              let percentage = parseInt(100 * userData.wins / (userData.wins + userData.looses));
+              addColumn(`${userData.wins}` + isNaN(percentage) ? '' : ` (${percentage}%)`);
               break;
             case 'Games':
               addColumn(`${userData.wins + userData.looses}`);
               break;
             case 'Shots fired (accuracy)':
-              addColumn(`${userData.shotsFired} (${parseInt(100 * userData.shotsFiredHit / (userData.shotsFired + userData.shotsFiredHit))}%)`);
+              let percentage = parseInt(100 * userData.shotsFiredHit / (userData.shotsFired + userData.shotsFiredHit));
+              addColumn(`${userData.shotsFired}` + isNaN(percentage) ? '' : ` (${percentage}%)`);
               break;
             case 'Shots taken (accuracy)':
-              addColumn(`${userData.shotsTaken} (${parseInt(100 * userData.shotsTakenHit / (userData.shotsTaken + userData.shotsTakenHit))}%)`);
+              let percentage = parseInt(100 * userData.shotsTakenHit / (userData.shotsTaken + userData.shotsTakenHit));
+              addColumn(`${userData.shotsTaken}` + isNaN(percentage) ? '' : ` (${percentage}%)`);
               break;
             default:
               addColumn('');
