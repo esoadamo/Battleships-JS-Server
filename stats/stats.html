@@ -25,7 +25,7 @@
 
     function paintTable(data) {
       let rows = [];
-      let headers = ['Name', 'Games', 'Wins', 'Shots fired (accuracy)', 'Shots taken (accuracy)']
+      let headers = ['Name', 'Score', 'Games', 'Wins', 'Shots fired (accuracy)', 'Shots taken (accuracy)']
       for (user of Object.keys(data)) {
         let tr = document.createElement('tr');
 
@@ -48,11 +48,15 @@
         Object.assign(userData, data[user]);
         tr.dataset.winPercentage = parseInt(100 * userData.wins / (userData.wins + userData.looses));
         tr.dataset.wins = userData.wins;
+        tr.dataset.score = userData.score;
 
         for (let header of headers)
           switch (header) {
             case 'Name':
               addColumn(user);
+              break;
+            case 'Score':
+              addColumn(`${userData.score}`);
               break;
             case 'Wins':
               let percentage = parseInt(100 * userData.wins / (userData.wins + userData.looses));
@@ -85,7 +89,7 @@
 
       // Sort by the count of wins
       rows.sort((a, b) => {
-        return parseInt(b.dataset.wins) - parseInt(a.dataset.wins);
+        return parseInt(b.dataset.score) - parseInt(a.dataset.score);
       });
       for (let row of rows)
         tbody.appendChild(row);

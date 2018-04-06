@@ -213,8 +213,8 @@ const Client = function(socket) {
           } else {
             if (!includes.fieldsLeft.length) {
 
-              stats[this.name].shotsFiredHit++;
-              stats[this.opponent.name].shotsTakenHit++;
+              stats[this.name].score += 5;
+              stats[this.opponent.name].score -= 3;
               StatisticBacker.backup();
 
               console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} just fired at ${this.opponent.name}'s field ${field} (and sunk his ship)`);
@@ -246,6 +246,8 @@ const Client = function(socket) {
 
                 stats[this.name].wins++;
                 stats[this.opponent.name].looses++;
+                stats[this.name].score += 50;
+                stats[this.opponent.name].score -= 20;
                 StatisticBacker.backup();
 
                 this.gameCompleted = true;
@@ -255,6 +257,11 @@ const Client = function(socket) {
             }
             console.log(`[${moment().format('HH:mm:ss')}] →  ${this.name} just fired at ${this.opponent.name}'s field ${field} (and hit)`);
 
+            stats[this.name].shotsFiredHit++;
+            stats[this.name].score += 2;
+            stats[this.opponent.name].shotsTakenHit++;
+            stats[this.opponent.name].score -= 1;
+            StatisticBacker.backup();
             this.socket.emit('shotHit', {
               field,
               wasItYourShot: true
@@ -273,6 +280,8 @@ const Client = function(socket) {
           this.opponent.socket.emit('opponentLeft', null);
           stats[this.opponent.name].wins++;
           stats[this.name].looses++;
+          stats[this.opponent.name].score += 15;
+          stats[this.name].looses -= 7;
           StatisticBacker.backup();
         }
         this.socket.removeAllListeners('draftCompleted');
@@ -321,15 +330,8 @@ let stats = {
     shotsFired: 16,
     shotsFiredHit: 4,
     shotsTaken: 14,
-    shotsTakenHit: 3
-  },
-  Boy2: {
-    wins: 5,
-    looses: 4,
-    shotsFired: 14,
-    shotsFiredHit: 3,
-    shotsTaken: 16,
-    shotsTakenHit: 4
+    shotsTakenHit: 3,
+    score: 500
   }
   */
 };
@@ -407,7 +409,8 @@ io.on('connection', function(socket) {
         shotsFired: 0,
         shotsFiredHit: 0,
         shotsTaken: 0,
-        shotsTakenHit: 0
+        shotsTakenHit: 0,
+        score: 0
       };
     clientCurr.nationality = data['nationality'];
     clientCurr.dataSet = true;
@@ -423,6 +426,18 @@ io.on('connection', function(socket) {
     console.log(`[${moment().format('HH:mm:ss')}] ←  ${clientCurr.name !== null ? clientCurr.name : 'undefined'} left`);
     clientCurr.switchRoom(null);
     clients.splice(clients.indexOf(clientCurr), 1); // remove client from array. He is dead for me now.
+
+    // If this user has no statistics, remove him
+    if ((clientCurr.name !== null) && (clientCurr.name in stats)){
+      let everyStatIsZero = true;
+      for (let statValue of Object.values(clientCurr))
+        if(statValue !== 0){
+          everyStatIsZero = false;
+          break;
+        }
+      if (everyStatIsZero)
+        delete stats[clientCurr.name];
+    }
   });
 });
 
