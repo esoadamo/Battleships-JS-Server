@@ -285,10 +285,14 @@ const Client = function(socket) {
       if ((this.room !== null) && (this.room.startsWith('battle-'))) {
         if (!this.gameCompleted) {
           this.opponent.socket.emit('opponentLeft', null);
-          stats[this.opponent.name].wins++;
-          stats[this.name].looses++;
-          stats[this.opponent.name].score += 15;
-          stats[this.name].looses -= 7;
+          if (this.opponent.name in stats) {
+            stats[this.opponent.name].wins++;
+            stats[this.opponent.name].score += 15;
+          }
+          if (this.name in stats) {
+            stats[this.name].looses++;
+            stats[this.name].looses -= 7;
+          }
           StatisticBacker.backup();
         }
         this.socket.removeAllListeners('draftCompleted');
