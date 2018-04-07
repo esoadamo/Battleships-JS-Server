@@ -50,6 +50,7 @@
         tr.dataset.wins = userData.wins;
         tr.dataset.score = userData.score;
 
+        let percentage;
         for (let header of headers)
           switch (header) {
             case 'Name':
@@ -59,18 +60,18 @@
               addColumn(`${userData.score}`);
               break;
             case 'Wins':
-              var percentage = parseInt(100 * userData.wins / (userData.wins + userData.looses));
+              percentage = parseInt(100 * userData.wins / (userData.wins + userData.looses));
               addColumn(`${userData.wins}` + isNaN(percentage) ? '' : ` (${percentage}%)`);
               break;
             case 'Games':
               addColumn(`${userData.wins + userData.looses}`);
               break;
             case 'Shots fired (accuracy)':
-              var percentage = parseInt(100 * userData.shotsFiredHit / (userData.shotsFired + userData.shotsFiredHit));
+              percentage = parseInt(100 * userData.shotsFiredHit / (userData.shotsFired + userData.shotsFiredHit));
               addColumn(`${userData.shotsFired}` + isNaN(percentage) ? '' : ` (${percentage}%)`);
               break;
             case 'Shots taken (accuracy)':
-              var percentage = parseInt(100 * userData.shotsTakenHit / (userData.shotsTaken + userData.shotsTakenHit));
+              percentage = parseInt(100 * userData.shotsTakenHit / (userData.shotsTaken + userData.shotsTakenHit));
               addColumn(`${userData.shotsTaken}` + isNaN(percentage) ? '' : ` (${percentage}%)`);
               break;
             default:

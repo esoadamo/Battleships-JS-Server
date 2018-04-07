@@ -6,9 +6,11 @@ const io = require('socket.io')(http, {
 const moment = require('moment');
 const uuid = require('uuid/v4');
 const fs = require('fs');
+const path = require("path");
+const os = require("os");
 
 const PORT = 8473; // server port
-const FILE_STATSBACKUP = "stats.bk.json";
+const FILE_STATSBACKUP = path.resolve(path.join(os.tmpDir(), "stats.bk.json"));
 
 /**
 Backes statistics in case of program being unexpectly teerminated
@@ -48,7 +50,11 @@ const StatisticBacker = {
   load: () => {
     if (!fs.existsSync(FILE_STATSBACKUP))
       return;
-    Object.assign(stats, JSON.parse(fs.readFileSync(FILE_STATSBACKUP, "utf8")));
+    try {
+      Object.assign(stats, JSON.parse(fs.readFileSync(FILE_STATSBACKUP, "utf8")));
+    } catch (e) {
+      console.log(`[${moment().format('HH:mm:ss')}] →  loading failed`);
+    }
   },
 
   /**
