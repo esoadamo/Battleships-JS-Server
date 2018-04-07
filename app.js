@@ -11,7 +11,6 @@ const os = require("os");
 
 const PORT = 8473; // server port
 const FILE_STATSBACKUP = path.resolve(path.join(os.tmpdir(), "stats.bk.json"));
-console.log(FILE_STATSBACKUP);
 
 /**
 Backes statistics in case of program being unexpectly teerminated
@@ -311,7 +310,7 @@ const Client = function(socket) {
     }
 }
 
-Client.nationalities = ["CZ", 'DE']; // the two competing sides
+Client.nationalities = ["Orange", 'Purple']; // the two competing sides
 
 /**
  * Finds client by its name in a room and returns him
@@ -339,7 +338,8 @@ let stats = {
     shotsFiredHit: 4,
     shotsTaken: 14,
     shotsTakenHit: 3,
-    score: 500
+    score: 500,
+    team: "CZ"
   }
   */
 };
@@ -439,7 +439,7 @@ io.on('connection', function(socket) {
     if ((clientCurr.name !== null) && (clientCurr.name in stats)){
       let everyStatIsZero = true;
       for (let statValue of Object.values(clientCurr))
-        if(statValue !== 0){
+        if((typeof statValue === 'number') && (statValue !== 0)){
           everyStatIsZero = false;
           break;
         }

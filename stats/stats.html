@@ -21,12 +21,19 @@
 
   <script>
     const refreshSeconds = 10;
-    const tbody = document.querySelector('#tbody')
+    const tbody = document.querySelector('#tbody');
+    const teamColors = {Orange: '#9907A8', Purple: '#9907A8'};
+    const headers = ['Name', 'Score', 'Games', 'Wins', 'Shots fired (accuracy)', 'Shots taken (accuracy)'];
 
-    function paintTable(data) {
-      let rows = [];
-      let headers = ['Name', 'Score', 'Games', 'Wins', 'Shots fired (accuracy)', 'Shots taken (accuracy)']
-      for (user of Object.keys(data)) {
+    function paintTable(dataUsers) {
+      let rows = {
+        user: [],
+        team: []
+      }
+
+      let dataTeams = {};
+
+      function createRow(data){
         let tr = document.createElement('tr');
 
         function addColumn(text) {
@@ -42,19 +49,35 @@
           shotsFired: 0,
           shotsFiredHit: 0,
           shotsTaken: 0,
-          shotsTakenHit: 0
+          shotsTakenHit: 0,
+          score: 0,
+          team: null,
+          teamData: false // if set to true then this are the data of the whole team
         };
 
-        Object.assign(userData, data[user]);
-        tr.dataset.winPercentage = parseInt(100 * userData.wins / (userData.wins + userData.looses));
-        tr.dataset.wins = userData.wins;
+        Object.assign(userData, data);
+
         tr.dataset.score = userData.score;
+        tr.style.color = userData.team in teamColors ? teamColors[userData.team] : "#000000";
+
+        // Count user's data into team statistics
+        if ((!userData.teamData) && (userData.team !== null)){
+          if (!(userData.team in dataTeams))
+            dataTeams[userData.team] = {name: userData.team, teamData: true, team: userData.team};
+          for (let stat of Object.keys(userData)){
+            if (typeof userData[stat] !== 'number')
+              continue;
+            if (!(stat in dataTeams[userData.team]))
+               dataTeams[userData.team][stat] = 0;
+            dataTeams[userData.team][stat] += userData[stat];
+          }
+        }
 
         let percentage;
         for (let header of headers)
           switch (header) {
             case 'Name':
-              addColumn(user);
+              addColumn(userData.name);
               break;
             case 'Score':
               addColumn(`${userData.score}`);
@@ -77,8 +100,15 @@
             default:
               addColumn('');
           }
-        rows.push(tr);
+        return tr;
       }
+
+      for (user of Object.keys(dataUsers))
+        rows.user.push(createRow(dataUsers[user]));
+
+      for (team of Object.keys(dataTeams))
+        rows.team.push(createRow(dataTeams[team]));
+
       tbody.innerHTML = "";
       let headerRow = document.createElement('tr');
       for (let header of headers) {
@@ -88,16 +118,22 @@
       }
       tbody.appendChild(headerRow);
 
-      // Sort by the count of wins
-      rows.sort((a, b) => {
+      // Sort by the scre
+      for (let rowsType of Object.keys(rows))
+        rows[rowsType].sort((a, b) => {
         return parseInt(b.dataset.score) - parseInt(a.dataset.score);
-      });
-      for (let row of rows)
+        });
+
+      for (let row of rows.team)
+        tbody.appendChild(row);
+      let trSpacing = document.createElement('tr');
+      trSpacing.style.height = '1em';
+      tbody.appendChild(trSpacing);
+      for (let row of rows.user)
         tbody.appendChild(row);
     }
 
     function fetchData() {
-      console.log('Requesting');
       var xmlHttp = new XMLHttpRequest();
       xmlHttp.onreadystatechange = function() {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
