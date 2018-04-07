@@ -4,7 +4,8 @@
   "description": "Battleship - a JS server",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "nodemon app.js",
+    "forever": "while true; do node app.js; done"
   },
   "keywords": [
     "battleships",
