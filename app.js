@@ -437,17 +437,9 @@ io.on('connection', function(socket) {
     clientCurr.switchRoom(null);
     clients.splice(clients.indexOf(clientCurr), 1); // remove client from array. He is dead for me now.
 
-    // If this user has no statistics, remove him
-    if ((clientCurr.name !== null) && (clientCurr.name in stats)){
-      let everyStatIsZero = true;
-      for (let statValue of Object.values(clientCurr))
-        if((typeof statValue === 'number') && (statValue !== 0)){
-          everyStatIsZero = false;
-          break;
-        }
-      if (everyStatIsZero)
-        delete stats[clientCurr.name];
-    }
+    // If this user has taken no action
+    if ((clientCurr.name !== null) && (clientCurr.name in stats) && (stats[clientCurr.name].shotsFired + stats[clientCurr.name].shotsTaken === 0))
+      delete stats[clientCurr.name];
   });
 });
 
