@@ -291,7 +291,7 @@ const Client = function(socket) {
           }
           if (this.name in stats) {
             stats[this.name].looses++;
-            stats[this.name].looses -= 7;
+            stats[this.name].score -= 7;
           }
           StatisticBacker.backup();
         }
