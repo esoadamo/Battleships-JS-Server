@@ -61,18 +61,18 @@
               break;
             case 'Wins':
               percentage = parseInt(100 * userData.wins / (userData.wins + userData.looses));
-              addColumn(`${userData.wins}` + isNaN(percentage) ? '' : ` (${percentage}%)`);
+              addColumn(`${userData.wins}` + (isNaN(percentage) ? '' : ` (${percentage}%)`));
               break;
             case 'Games':
               addColumn(`${userData.wins + userData.looses}`);
               break;
             case 'Shots fired (accuracy)':
               percentage = parseInt(100 * userData.shotsFiredHit / (userData.shotsFired + userData.shotsFiredHit));
-              addColumn(`${userData.shotsFired}` + isNaN(percentage) ? '' : ` (${percentage}%)`);
+              addColumn(`${userData.shotsFired}` + (isNaN(percentage) ? '' : ` (${percentage}%)`));
               break;
             case 'Shots taken (accuracy)':
               percentage = parseInt(100 * userData.shotsTakenHit / (userData.shotsTaken + userData.shotsTakenHit));
-              addColumn(`${userData.shotsTaken}` + isNaN(percentage) ? '' : ` (${percentage}%)`);
+              addColumn(`${userData.shotsTaken}` + (isNaN(percentage) ? '' : ` (${percentage}%)`));
               break;
             default:
               addColumn('');
