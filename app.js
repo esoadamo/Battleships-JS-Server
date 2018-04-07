@@ -10,7 +10,8 @@ const path = require("path");
 const os = require("os");
 
 const PORT = 8473; // server port
-const FILE_STATSBACKUP = path.resolve(path.join(os.tmpDir(), "stats.bk.json"));
+const FILE_STATSBACKUP = path.resolve(path.join(os.tmpdir(), "stats.bk.json"));
+console.log(FILE_STATSBACKUP);
 
 /**
 Backes statistics in case of program being unexpectly teerminated
@@ -52,6 +53,7 @@ const StatisticBacker = {
       return;
     try {
       Object.assign(stats, JSON.parse(fs.readFileSync(FILE_STATSBACKUP, "utf8")));
+      console.log(`[${moment().format('HH:mm:ss')}] →  loaded`);
     } catch (e) {
       console.log(`[${moment().format('HH:mm:ss')}] →  loading failed`);
     }
