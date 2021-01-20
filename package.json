@@ -17,7 +17,7 @@
   "dependencies": {
     "express": "^4.16.2",
     "moment": "^2.20.1",
-    "socket.io": "^2.0.4",
+    "socket.io": "^2.4.0",
     "uuid": "^3.2.1"
   },
   "devDependencies": {
